@@ -54,7 +54,7 @@ total_X = dataset.drop(columns=['MOLECULE', 'Act']).to_numpy()
 
 Xtc, Xtest, Ytc, Ytest = train_test_split(total_X, total_Y, test_size=0.3, shuffle=True) # tc: train and calib
 
-fdp_nominals = np.linspace(0.01, 0.99, 200)
+fdp_nominals = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
 all_res = pd.DataFrame()
 
 all_res['fdp_nominals'] = fdp_nominals
@@ -85,7 +85,7 @@ rf = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
 Xtrain, _, Ytrain, _ = train_test_split(Xtrain, Ytrain, train_size=0.7, shuffle=True)
 rf.fit(Xtrain, Ytrain)
 
-R_list = np.zeros(200) # which threshold to use?
+R_list = np.zeros(len(fdp_nominals)) # which threshold to use?
 fdps_15_rb, pcers_15_rb, powers_15_rb = [], [], []
 
 Ypred_calib = rf.predict(Xcalib)
@@ -140,7 +140,7 @@ var_train_rmse = np.var(all_Ytrain_rmse_pred, axis=1)
 
 rf_rmse.fit(np.column_stack((Ytrain_rmse_pred, var_train_rmse)), np.abs(Ytrain_rmse - Ytrain_rmse_pred))
 
-R_list = np.zeros(200) # which threshold to use?
+R_list = np.zeros(len(fdp_nominals)) # which threshold to use?
 fdps_15_rp, pcers_15_rp, powers_15_rp = [], [], []
 
 Ypred_calib = rf.predict(Xcalib)
