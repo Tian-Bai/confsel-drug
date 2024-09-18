@@ -1,6 +1,4 @@
-from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import LinearRegression
 import numpy as np
 import pandas as pd
 import sys
@@ -198,9 +196,9 @@ all_res['fdps_cs'] = fdps_cs
 all_res['pcers_cs'] = pcers_cs
 all_res['powers_cs'] = powers_cs
 
-out_dir = f'data\\{dataset_name} {args.sample:.2f}'
+out_dir = f'res\\{dataset_name} {args.sample:.2f}'
 
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
-all_res.to_csv(f'data\\{dataset_name} {args.sample:.2f}\\{dataset_name} {args.sample:.2f} {args.seed}.csv')
+all_res.to_csv(f'res\\{dataset_name} {args.sample:.2f}\\{dataset_name} {args.sample:.2f} {args.seed}.csv')
