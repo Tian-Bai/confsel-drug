@@ -1,7 +1,5 @@
 import numpy as np
 import pandas as pd 
-from sklearn.linear_model import LinearRegression
-import argparse
 import math
 
 rf_param = ['n_estim', 'max_depth', 'max_features', 'max_leaf_nodes']
