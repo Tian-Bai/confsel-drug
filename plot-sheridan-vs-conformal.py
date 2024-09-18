@@ -13,7 +13,7 @@ args = parser.parse_args()
 df_list = []
 
 for i in range(1, args.seednum + 1):
-    path = f"data\\{args.dataset} {args.sample:.2f}\\{args.dataset} {args.sample:.2f} {i}.csv"
+    path = f"result\\{args.dataset} {args.sample:.2f}\\{args.dataset} {args.sample:.2f} {i}.csv"
     one_df = pd.read_csv(path)
     df_list.append(one_df)
 

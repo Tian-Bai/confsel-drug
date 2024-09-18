@@ -6,7 +6,6 @@ import pandas as pd
 import sys
 import os
 import random
-from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, accuracy_score
 import argparse
@@ -42,7 +41,7 @@ args = parser.parse_args()
 random.seed(args.seed)
 
 dataset_name = args.dataset
-dataset_path = f'data\\{dataset_name}_training_disguised.csv'
+dataset_path = f'data/{dataset_name}_training_disguised.csv'
 
 dataset = pd.read_csv(dataset_path)
 
@@ -198,9 +197,9 @@ all_res['fdps_cs'] = fdps_cs
 all_res['pcers_cs'] = pcers_cs
 all_res['powers_cs'] = powers_cs
 
-out_dir = f'data\\{dataset_name} {args.sample:.2f}'
+out_dir = f'result/{dataset_name} {args.sample:.2f}'
 
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
-all_res.to_csv(f'data\\{dataset_name} {args.sample:.2f}\\{dataset_name} {args.sample:.2f} {args.seed}.csv')
+all_res.to_csv(f'result/{dataset_name} {args.sample:.2f}/{dataset_name} {args.sample:.2f} {args.seed}.csv')

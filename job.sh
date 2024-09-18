@@ -6,10 +6,10 @@ for dataset in "${dataset_list[@]}"; do
     for size in 0.1; do
         for seed in {1..100}; do
             echo "running $dataset $size $seed"
-            nohup python sheridan-vs-conformal.py $dataset $size $seed &
+            python3 sheridan-vs-conformal.py $dataset $size $seed "output_$dataset_$size_$seed.log" &
         done
     done
 done
 
-wait
+
 
