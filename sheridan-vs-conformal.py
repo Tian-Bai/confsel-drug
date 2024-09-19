@@ -39,7 +39,7 @@ args = parser.parse_args()
 random.seed(args.seed)
 
 dataset_name = args.dataset
-dataset_path = f'data/{dataset_name}_training_disguised.csv'
+dataset_path = os.path.join('data', f'{dataset_name}_training_disguised.csv')
 
 dataset = pd.read_csv(dataset_path)
 
@@ -54,7 +54,7 @@ total_X = dataset.drop(columns=['MOLECULE', 'Act']).to_numpy()
 
 Xtc, Xtest, Ytc, Ytest = train_test_split(total_X, total_Y, test_size=0.3, shuffle=True) # tc: train and calib
 
-fdp_nominals = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
+fdp_nominals = np.linspace(0.1, 0.5, 9)
 all_res = pd.DataFrame()
 
 all_res['fdp_nominals'] = fdp_nominals
@@ -195,9 +195,9 @@ all_res['fdps_cs'] = fdps_cs
 all_res['pcers_cs'] = pcers_cs
 all_res['powers_cs'] = powers_cs
 
-out_dir = f'result/{dataset_name} {args.sample:.2f}'
+out_dir = os.path.join('result', f'{dataset_name} {args.sample:.2f}')
 
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
-all_res.to_csv(f'result/{dataset_name} {args.sample:.2f}/{dataset_name} {args.sample:.2f} {args.seed}.csv')
+all_res.to_csv(os.path.join('result', f'{dataset_name} {args.sample:.2f}', f'{dataset_name} {args.sample:.2f} {args.seed}.csv'))

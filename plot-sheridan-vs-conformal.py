@@ -13,7 +13,7 @@ args = parser.parse_args()
 df_list = []
 
 for i in range(1, args.seednum + 1):
-    path = f"result/{args.dataset} {args.sample:.2f}/{args.dataset} {args.sample:.2f} {i}.csv"
+    path = os.path.join('result', f'{args.dataset} {args.sample:.2f}', f'{args.dataset} {args.sample:.2f} {i}.csv')
     one_df = pd.read_csv(path)
     df_list.append(one_df)
 
@@ -35,85 +35,40 @@ pcers_cs = df['pcers_cs']
 
 # plot treevar
 
-out_dir = f'pic/{args.dataset} {args.sample:.2f}'
+out_dir = os.path.join('indiv_pic', f'{args.dataset} {args.sample:.2f}')
 
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
-# plot RMSE bin
+# plot FDP comparison
 
-fig, axs = plt.subplots(ncols=3, figsize=(20, 6))
-fig.suptitle(f"Power, FDP and PCER vs nominal FDP level in Sheridan (2015), RMSE binning, {args.dataset} dataset, averaged over {args.seednum} times")
-axs[0].plot(fdp_nominals, powers_15_rb)
-axs[0].set_xlabel("nominal FDP level")
-axs[0].set_ylabel("power")
-axs[1].plot(fdp_nominals, fdps_15_rb)
-axs[1].set_xlabel("nominal FDP level")
-axs[1].set_ylabel("FDP")
-axs[2].plot(fdp_nominals, pcers_15_rb)
-axs[1].plot([0, 1], [0, 1], color='green', linestyle='-.', alpha=0.5)
-axs[2].set_xlabel("nominal FDP level")
-axs[2].set_ylabel("PCER")
-plt.savefig(f'pic/{args.dataset} {args.sample:.2f}/Power, FDP and PCER (15, RMSEbin).png')
-
-# plot RMSE pred
-
-fig, axs = plt.subplots(ncols=3, figsize=(20, 6))
-fig.suptitle(f"Power, FDP and PCER vs nominal FDP level in Sheridan (2015), RMSE prediction, {args.dataset} dataset, averaged over {args.seednum} times")
-axs[0].plot(fdp_nominals, powers_15_rp)
-axs[0].set_xlabel("nominal FDP level")
-axs[0].set_ylabel("power")
-axs[1].plot(fdp_nominals, fdps_15_rp)
-axs[1].set_xlabel("nominal FDP level")
-axs[1].set_ylabel("FDP")
-axs[2].plot(fdp_nominals, pcers_15_rp)
-axs[1].plot([0, 1], [0, 1], color='green', linestyle='-.', alpha=0.5)
-axs[2].set_xlabel("nominal FDP level")
-axs[2].set_ylabel("PCER")
-plt.savefig(f'pic/{args.dataset} {args.sample:.2f}/Power, FDP and PCER (15, RMSEpred).png')
-
-# plot conformal
-
-fig, axs = plt.subplots(ncols=3, figsize=(20, 6))
-
-fig.suptitle(f"Power, FDP and PCER vs nominal level of conformal selection, {args.dataset} dataset, averaged over {args.seednum} times")
-axs[0].plot(fdp_nominals, powers_cs)
-axs[0].set_xlabel("nominal level")
-axs[0].set_ylabel("power")
-axs[1].plot(fdp_nominals, fdps_cs)
-axs[1].plot([0, 1], [0, 1], color='green', linestyle='-.', alpha=0.5)
-axs[1].set_xlabel("nominal level")
-axs[1].set_ylabel("FDP")
-axs[2].plot(fdp_nominals, pcers_cs)
-axs[2].set_xlabel("nominal level")
-axs[2].set_ylabel("PCER")
-plt.savefig(f'pic/{args.dataset} {args.sample:.2f}/Power, FDP and PCER (cs).png')
-
-# FDP power comparison
-
-idx = np.searchsorted(fdp_nominals, 0.5, side='right')
+idx_list = [np.searchsorted(fdp_nominals, i, side='right') for i in np.linspace(0.1, 0.5, 10)]
 
 fig, axs = plt.subplots(figsize=(8, 6))
 
 fig.suptitle(f"FDP control for Sheridan's method and Conformal Selection method, \n {args.dataset} dataset, averaged over {args.seednum} times")
-axs.plot(fdp_nominals[:idx], fdps_15_rb[:idx], label='Sheridan (2015), rb')
-axs.plot(fdp_nominals[:idx], fdps_15_rp[:idx], label='Sheridan (2015), rp')
-axs.plot(fdp_nominals[:idx], fdps_cs[:idx], label='Conformal Selection')
-axs.plot([0, 0.5], [0, 0.5], color='grey', alpha=0.7, linestyle='-.')
+axs.plot(fdp_nominals[idx_list], fdps_15_rb[idx_list], label='Sheridan (2015), bin', marker='o')
+axs.plot(fdp_nominals[idx_list], fdps_15_rp[idx_list], label='Sheridan (2015), pred', marker='o')
+axs.plot(fdp_nominals[idx_list], fdps_cs[idx_list], label='Conformal Selection', marker='o')
+axs.plot([0.05, 0.55], [0.05, 0.55], color='grey', alpha=0.7, linestyle='-.')
 axs.set_xlabel("Nominal level")
-axs.set_ylabel("Realized FDP")
+axs.set_ylabel("Risk ")
 plt.legend()
-plt.savefig(f'pic/{args.dataset} {args.sample:.2f}/FDP control.png')
+plt.savefig(os.path.join('indiv_pic', f'{args.dataset} {args.sample:.2f}', f'FDP control.png'))
 
 # plot power comparison
+
+idx_list_15_rb = [np.searchsorted(fdps_15_rb, i, side='right') for i in np.linspace(0.1, 0.5, 10)]
+idx_list_15_rp = [np.searchsorted(fdps_15_rp, i, side='right') for i in np.linspace(0.1, 0.5, 10)]
+idx_list_cs = [np.searchsorted(fdps_cs, i, side='right') for i in np.linspace(0.1, 0.5, 10)]
 
 fig, axs = plt.subplots(figsize=(8, 6))
 
 fig.suptitle(f"Power vs FDP for Sheridan's method and Conformal Selection method, \n {args.dataset} dataset, averaged over {args.seednum} times")
-axs.plot(fdps_15_rb, powers_15_rb, label='Sheridan (2015), rb')
-axs.plot(fdps_15_rp, powers_15_rp, label='Sheridan (2015), rp')
-axs.plot(fdps_cs, powers_cs, label='Conformal Selection')
+axs.plot(fdps_15_rb[idx_list_15_rb], powers_15_rb[idx_list_15_rb], label='Sheridan (2015), bin', marker='o')
+axs.plot(fdps_15_rp[idx_list_15_rp], powers_15_rp[idx_list_15_rp], label='Sheridan (2015), pred', marker='o')
+axs.plot(fdps_cs[idx_list_cs], powers_cs[idx_list_cs], label='Conformal Selection', marker='o')
 axs.set_xlabel("FDP")
 axs.set_ylabel("Power")
 plt.legend()
-plt.savefig(f'pic/{args.dataset} {args.sample:.2f}/Power vs FDP.png')
+plt.savefig(os.path.join('indiv_pic', f'{args.dataset} {args.sample:.2f}', f'Power vs FDP.png'))
