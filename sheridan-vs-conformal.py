@@ -7,7 +7,7 @@ import random
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, accuracy_score
 import argparse
-from utility import BH
+from utility import BH, Timer
 
 def dice_sim(f, set_of_f):
     f = np.array(f)
@@ -52,148 +52,156 @@ threshold = thresholds_map[dataset_name]
 total_Y = dataset['Act'].to_numpy()
 total_X = dataset.drop(columns=['MOLECULE', 'Act']).to_numpy()
 
-Xtc, Xtest, Ytc, Ytest = train_test_split(total_X, total_Y, test_size=0.3, shuffle=True) # tc: train and calib
+Xtc, Xtest, Ytc, Ytest = train_test_split(total_X, total_Y, test_size=15/100, shuffle=True) # tc: train and calib
 
 fdp_nominals = np.linspace(0.1, 0.5, 9)
 all_res = pd.DataFrame()
 
 all_res['fdp_nominals'] = fdp_nominals
 
-''' RMSE-bin (Sheridan 2012) '''
-
+''' RMSE-bin (Sheridan 2004) '''
+# 15% test, 15% calib, for each RMSE accumulation, 50% train, 20% test
 # since data is limited in size in our case, we will only use 1d binning
 
-Xtrain, Xcalib, Ytrain, Ycalib = train_test_split(Xtc, Ytc, train_size=0.7, shuffle=True)
+with Timer() as timer:
+    Xtrain, Xcalib, Ytrain, Ycalib = train_test_split(Xtc, Ytc, train_size=70/85, shuffle=True)
 
-# now only use Xtrain to do RMSE binning
+    # now only use Xtrain to do RMSE binning
+    rmse_df_list = []
+    for k in range(5):
+        Xtrain_1, Xtrain_2, Ytrain_1, Ytrain_2 = train_test_split(Xtrain, Ytrain, train_size=50/70, shuffle=True)
+        rf = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
+        rf.fit(Xtrain_1, Ytrain_1)
 
-rmse_df_list = []
-for k in range(5):
-    Xtrain_1, Xtrain_2, Ytrain_1, Ytrain_2 = train_test_split(Xtrain, Ytrain, train_size=0.7, shuffle=True)
+        sim_nearest = np.array([dice_sim(x, Xtrain_1) for x in Xtrain_2])
+        RMSE = np.absolute(Ytrain_2 - rf.predict(Xtrain_2))
+        rmse_df_one = pd.DataFrame({'dice': sim_nearest, 'RMSE': RMSE})
+        rmse_df_list.append(rmse_df_one)
+
+    RMSE_df = pd.concat(rmse_df_list, ignore_index=True)
+
+    # now use 50% of data to train rf
     rf = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
-    rf.fit(Xtrain_1, Ytrain_1)
+    Xtrain, _, Ytrain, _ = train_test_split(Xtrain, Ytrain, train_size=50/70, shuffle=True)
+    rf.fit(Xtrain, Ytrain)
 
-    sim_nearest = np.array([dice_sim(x, Xtrain_1) for x in Xtrain_2])
-    RMSE = np.absolute(Ytrain_2 - rf.predict(Xtrain_2))
-    rmse_df_one = pd.DataFrame({'dice': sim_nearest, 'RMSE': RMSE})
-    rmse_df_list.append(rmse_df_one)
+    R_list = np.zeros(len(fdp_nominals)) # which threshold to use?
+    fdps_15_rb, pcers_15_rb, powers_15_rb = [], [], []
 
-RMSE_df = pd.concat(rmse_df_list, ignore_index=True)
+    Ypred_calib = rf.predict(Xcalib)
+    sim_calib = np.array([dice_sim(x, Xtrain) for x in Xcalib])
+    rmse_calib = []
+    for s in sim_calib:
+        filtered_RMSE_df = RMSE_df[(s - 0.05 <= RMSE_df["dice"]) & (RMSE_df["dice"] <= s + 0.05)]
+        rmse = filtered_RMSE_df["RMSE"].mean()
+        rmse_calib.append(rmse)
+    rmse_calib = np.array(rmse_calib)
 
-# now use 70% of Xtrain to train rf
-rf = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
-Xtrain, _, Ytrain, _ = train_test_split(Xtrain, Ytrain, train_size=0.7, shuffle=True)
-rf.fit(Xtrain, Ytrain)
+    z_calib = (threshold - Ypred_calib) / rmse_calib
 
-R_list = np.zeros(len(fdp_nominals)) # which threshold to use?
-fdps_15_rb, pcers_15_rb, powers_15_rb = [], [], []
+    for R in np.linspace(0.5, -2, 200):
+        try_r_sel = [j for j in range(len(z_calib)) if z_calib[j] >= R]
+        try_fdp, _, _ = eval(Ycalib, try_r_sel, -100, threshold)
+        R_list[fdp_nominals >= try_fdp] = R
 
-Ypred_calib = rf.predict(Xcalib)
-sim_calib = np.array([dice_sim(x, Xtrain) for x in Xcalib])
-rmse_calib = []
-for s in sim_calib:
-    filtered_RMSE_df = RMSE_df[(s - 0.05 <= RMSE_df["dice"]) & (RMSE_df["dice"] <= s + 0.05)]
-    rmse = filtered_RMSE_df["RMSE"].mean()
-    rmse_calib.append(rmse)
-rmse_calib = np.array(rmse_calib)
+    Ypred_test = rf.predict(Xtest)
+    sim_test = np.array([dice_sim(x, Xtrain) for x in Xtest])
+    rmse_test = []
+    for s in sim_test:
+        filtered_RMSE_df = RMSE_df[(s - 0.05 <= RMSE_df["dice"]) & (RMSE_df["dice"] <= s + 0.05)]
+        rmse = filtered_RMSE_df["RMSE"].mean()
+        rmse_test.append(rmse)
+    rmse_test = np.array(rmse_test)
 
-z_calib = (threshold - Ypred_calib) / rmse_calib
+    z_test = (threshold - Ypred_test) / rmse_test
 
-for R in np.linspace(0.5, -2, 200):
-    try_r_sel = [j for j in range(len(z_calib)) if z_calib[j] >= R]
-    try_fdp, _, _ = eval(Ycalib, try_r_sel, -100, threshold)
-    R_list[fdp_nominals >= try_fdp] = R
-
-Ypred_test = rf.predict(Xtest)
-sim_test = np.array([dice_sim(x, Xtrain) for x in Xtest])
-rmse_test = []
-for s in sim_test:
-    filtered_RMSE_df = RMSE_df[(s - 0.05 <= RMSE_df["dice"]) & (RMSE_df["dice"] <= s + 0.05)]
-    rmse = filtered_RMSE_df["RMSE"].mean()
-    rmse_test.append(rmse)
-rmse_test = np.array(rmse_test)
-
-z_test = (threshold - Ypred_test) / rmse_test
-
-for i, R in enumerate(R_list):
-    sheridan_15 = [j for j in range(len(z_test)) if z_test[j] >= R]
-    fdp, pcer, power = eval(Ytest, sheridan_15, -100, threshold)
-    fdps_15_rb.append(fdp)
-    pcers_15_rb.append(pcer)
-    powers_15_rb.append(power)
+    for i, R in enumerate(R_list):
+        sheridan_15 = [j for j in range(len(z_test)) if z_test[j] >= R]
+        fdp, pcer, power = eval(Ytest, sheridan_15, -100, threshold)
+        fdps_15_rb.append(fdp)
+        pcers_15_rb.append(pcer)
+        powers_15_rb.append(power)
 
 all_res['fdps_15_rb'] = fdps_15_rb
 all_res['pcers_15_rb'] = pcers_15_rb
 all_res['powers_15_rb'] = powers_15_rb
+all_res['time_15_rb'] = [timer.runtime] * len(fdp_nominals)
 
 ''' RMSE-pred (Sheridan 2013) '''
+# 15% test, 15% calib, 50% train rf, 20% train rmse
 
-rf = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
-rf_rmse = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
-Xtrain, Xcalib, Ytrain, Ycalib = train_test_split(Xtc, Ytc, train_size=0.7, shuffle=True)
-Xtrain, Xtrain_rmse, Ytrain, Ytrain_rmse = train_test_split(Xtrain, Ytrain, train_size=0.5, shuffle=True)
-rf.fit(Xtrain, Ytrain)
+with Timer() as timer:
+    rf = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
+    rf_rmse = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
+    Xtrain, Xcalib, Ytrain, Ycalib = train_test_split(Xtc, Ytc, train_size=70/85, shuffle=True)
+    Xtrain, Xtrain_rmse, Ytrain, Ytrain_rmse = train_test_split(Xtrain, Ytrain, train_size=50/70, shuffle=True)
+    rf.fit(Xtrain, Ytrain)
 
-Ytrain_rmse_pred = rf.predict(Xtrain_rmse)
-all_Ytrain_rmse_pred = np.column_stack([tree.predict(Xtrain_rmse) for tree in rf.estimators_])
-var_train_rmse = np.var(all_Ytrain_rmse_pred, axis=1)
+    Ytrain_rmse_pred = rf.predict(Xtrain_rmse)
+    all_Ytrain_rmse_pred = np.column_stack([tree.predict(Xtrain_rmse) for tree in rf.estimators_])
+    var_train_rmse = np.var(all_Ytrain_rmse_pred, axis=1)
 
-rf_rmse.fit(np.column_stack((Ytrain_rmse_pred, var_train_rmse)), np.abs(Ytrain_rmse - Ytrain_rmse_pred))
+    rf_rmse.fit(np.column_stack((Ytrain_rmse_pred, var_train_rmse)), np.abs(Ytrain_rmse - Ytrain_rmse_pred))
 
-R_list = np.zeros(len(fdp_nominals)) # which threshold to use?
-fdps_15_rp, pcers_15_rp, powers_15_rp = [], [], []
+    R_list = np.zeros(len(fdp_nominals)) # which threshold to use?
+    fdps_15_rp, pcers_15_rp, powers_15_rp = [], [], []
 
-Ypred_calib = rf.predict(Xcalib)
-all_Ypred = np.column_stack([tree.predict(Xcalib) for tree in rf.estimators_])
-var_calib = np.var(all_Ypred, axis=1)
+    Ypred_calib = rf.predict(Xcalib)
+    all_Ypred = np.column_stack([tree.predict(Xcalib) for tree in rf.estimators_])
+    var_calib = np.var(all_Ypred, axis=1)
 
-rmse_calib = rf_rmse.predict(np.column_stack((Ypred_calib, var_calib)))
+    rmse_calib = rf_rmse.predict(np.column_stack((Ypred_calib, var_calib)))
 
-z_calib = (threshold - Ypred_calib) / rmse_calib
+    z_calib = (threshold - Ypred_calib) / rmse_calib
 
-for R in np.linspace(0.5, -2, 200):
-    try_r_sel = [j for j in range(len(z_calib)) if z_calib[j] >= R]
-    try_fdp, _, _ = eval(Ycalib, try_r_sel, -100, threshold)
-    R_list[fdp_nominals >= try_fdp] = R
+    for R in np.linspace(0.5, -2, 200):
+        try_r_sel = [j for j in range(len(z_calib)) if z_calib[j] >= R]
+        try_fdp, _, _ = eval(Ycalib, try_r_sel, -100, threshold)
+        R_list[fdp_nominals >= try_fdp] = R
 
-Ypred_test = rf.predict(Xtest)
-all_Ypred = np.column_stack([tree.predict(Xtest) for tree in rf.estimators_])
-var_test = np.var(all_Ypred, axis=1)
+    Ypred_test = rf.predict(Xtest)
+    all_Ypred = np.column_stack([tree.predict(Xtest) for tree in rf.estimators_])
+    var_test = np.var(all_Ypred, axis=1)
 
-rmse_test = rf_rmse.predict(np.column_stack((Ypred_test, var_test)))
-z_test = (threshold - Ypred_test) / rmse_test
+    rmse_test = rf_rmse.predict(np.column_stack((Ypred_test, var_test)))
+    z_test = (threshold - Ypred_test) / rmse_test
 
-for i, R in enumerate(R_list):
-    sheridan_15 = [j for j in range(len(z_test)) if z_test[j] >= R]
-    fdp, pcer, power = eval(Ytest, sheridan_15, -100, threshold)
-    fdps_15_rp.append(fdp)
-    pcers_15_rp.append(pcer)
-    powers_15_rp.append(power)
+    for i, R in enumerate(R_list):
+        sheridan_15 = [j for j in range(len(z_test)) if z_test[j] >= R]
+        fdp, pcer, power = eval(Ytest, sheridan_15, -100, threshold)
+        fdps_15_rp.append(fdp)
+        pcers_15_rp.append(pcer)
+        powers_15_rp.append(power)
 
 all_res['fdps_15_rp'] = fdps_15_rp
 all_res['pcers_15_rp'] = pcers_15_rp
 all_res['powers_15_rp'] = powers_15_rp
+all_res['time_15_rp'] = [timer.runtime] * len(fdp_nominals) # time them together
 
 ''' conformal selection method '''
+# 15% test, 35% calibration, 50% train
+# in fact more can be used to train, but for a fair comparison, ...
 
-rf = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
-Xtrain, Xcalib, Ytrain, Ycalib = train_test_split(Xtc, Ytc, train_size=0.7, shuffle=True)
-rf.fit(Xtrain, Ytrain < threshold)
+with Timer() as timer:
+    rf = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
+    Xtrain, Xcalib, Ytrain, Ycalib = train_test_split(Xtc, Ytc, train_size=50/85, shuffle=True)
+    rf.fit(Xtrain, Ytrain < threshold)
 
-fdps_cs, pcers_cs, powers_cs = [], [], []
+    fdps_cs, pcers_cs, powers_cs = [], [], []
 
-for i, fdp_nominal in enumerate(fdp_nominals):
-    calib_scores_2clip = 1000 * (Ycalib < threshold) - rf.predict(Xcalib)   # Ycalib_cs > 0.5 <=> original Ycalib_cs < threshold
-    test_scores = -rf.predict(Xtest)
-    BH_2clip = BH(calib_scores_2clip, test_scores, fdp_nominal)
-    fdp, pcer, power = eval(Ytest, BH_2clip, -100, threshold)
-    fdps_cs.append(fdp)
-    pcers_cs.append(pcer)
-    powers_cs.append(power)
+    for i, fdp_nominal in enumerate(fdp_nominals):
+        calib_scores_2clip = 1000 * (Ycalib < threshold) - rf.predict(Xcalib)   # Ycalib_cs > 0.5 <=> original Ycalib_cs < threshold
+        test_scores = -rf.predict(Xtest)
+        BH_2clip = BH(calib_scores_2clip, test_scores, fdp_nominal)
+        fdp, pcer, power = eval(Ytest, BH_2clip, -100, threshold)
+        fdps_cs.append(fdp)
+        pcers_cs.append(pcer)
+        powers_cs.append(power)
 
 all_res['fdps_cs'] = fdps_cs
 all_res['pcers_cs'] = pcers_cs
 all_res['powers_cs'] = powers_cs
+all_res['time_cs'] = [timer.runtime] * len(fdp_nominals)
 
 out_dir = os.path.join('result', f'{dataset_name} {args.sample:.2f}')
 

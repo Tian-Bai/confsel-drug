@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd 
 import math
-
-rf_param = ['n_estim', 'max_depth', 'max_features', 'max_leaf_nodes']
-mlp_param = ['hidden', 'layers']
+import time
 
 '''
 Calculate the conformal p-values and then apply Benjamini-Hochberg procedure to do selection while controlling FDR.
@@ -74,14 +72,12 @@ def SingleSel(calib_scores, test_scores, q = 0.1, extra_info=None):
         else:
             return idx_sel, df_test
 
-def RegionSel(calib_scores, test_scores, q = 0.1):
-    ntest = len(test_scores)
-    ncalib = len(calib_scores)
+''' timer '''
+class Timer:
+    def __enter__(self):
+        self.start_time = time.time()
+        return self
 
-    calib_scores = np.sort(calib_scores)
-    d = ncalib - math.ceil((1 - q) * (1 + ncalib))
-    if d >= 0:
-        threshold = calib_scores[d]
-    else:
-        threshold = -math.inf
-    return [j for j in range(len(test_scores)) if 1 + test_scores[j] > threshold and test_scores[j] <= threshold]
+    def __exit__(self, *args):
+        self.end_time = time.time()
+        self.runtime = self.end_time - self.start_time

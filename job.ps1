@@ -1,4 +1,4 @@
-$datasets = @("3A4", "CB1", "DPP4", "HIVINT", "HIVPROT", "LOGD", "METAB", "NK1", "OX1", "OX2", "PGP", "PPB", "RAT_F", "TDI", "THROMBIN")
+$datasets = @("3A4", "CB1", "DPP4", "HIVINT", "HIVPROT", "LOGD", "METAB", "NK1", "OX1", "OX2", "PPB", "RAT_F", "TDI", "THROMBIN")
 $sample = "0.1"
 
 foreach ($dataset in $datasets) {
