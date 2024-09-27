@@ -6,7 +6,7 @@ TIME=3-00:00:00              # Time required (3d)
 CORE=10                      # Cores required (10)
 
 # Assemble order prefix
-ORDP="sbatch --mem="$MEMO" -n 1 -c "$CORE" -p "$PART" --time="$TIME" --chdir=/scratch/users/ying531/opt-cs/simulation/"
+ORDP="sbatch --account=def-yyang --mem="$MEMO" -n 1 -c "$CORE" -p "$PART" --time="$TIME" --chdir=/scratch/users/ying531/opt-cs/simulation/"
 
 # Create directory for log files
 LOGS=logs
