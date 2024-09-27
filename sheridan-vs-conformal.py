@@ -47,6 +47,7 @@ if args.sample < 1:
     dataset = dataset.sample(frac=args.sample)
 
 thresholds_map = {'NK1': 6.5, 'PGP': -0.3, 'LOGD': 1.5, '3A4': 4.35, 'CB1': 6.5, 'DPP4': 6, 'HIVINT': 6, 'HIVPROT': 4.5, 'METAB': 40, 'OX1': 5, 'OX2': 6, 'PPB': 1, 'RAT_F': 0.3, 'TDI': 0, 'THROMBIN': 6}
+# thresholds_map = {'NK1': 9.5, 'PGP': 0.5, 'LOGD': 4, '3A4': 4.5, 'CB1': 8.0, 'DPP4': 6.5, 'HIVINT': 7, 'HIVPROT': 9, 'METAB': 70, 'OX1': 7.5, 'OX2': 8, 'PPB': 2, 'RAT_F': 1.7, 'TDI': 1, 'THROMBIN': 7}
 threshold = thresholds_map[dataset_name]
 
 total_Y = dataset['Act'].to_numpy()
