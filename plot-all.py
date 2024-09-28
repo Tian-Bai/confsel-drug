@@ -3,6 +3,15 @@ import numpy as np
 from matplotlib import pyplot as plt
 import os
 import seaborn as sns
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('sample', type=float)
+parser.add_argument('seed', type=int)
+args = parser.parse_args()
+
+sample = args.sample
+n_itr = args.seed
 
 # Set ggplot style for the plots
 plt.style.use('ggplot')
@@ -12,8 +21,8 @@ dataset_list = ['3A4', 'CB1', 'DPP4', 'HIVINT', 'HIVPROT', 'LOGD', 'METAB', 'NK1
 
 for name in dataset_list:
     df_ones = []
-    for j in range(1, 101):
-        df = pd.read_csv(os.path.join("result", f"{name} 0.10", f"{name} 0.10 {j}.csv"))
+    for j in range(1, 1+n_itr):
+        df = pd.read_csv(os.path.join("result", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
         df_ones.append(df)
     df = pd.concat(df_ones).groupby("fdp_nominals", as_index=False).mean()
     df_list.append(df)
@@ -129,8 +138,8 @@ df_list = []
 
 for name in dataset_list:
     df_ones = []
-    for j in range(1, 101):
-        df = pd.read_csv(os.path.join("result", f"{name} 0.10", f"{name} 0.10 {j}.csv"))
+    for j in range(1, 1+n_itr):
+        df = pd.read_csv(os.path.join("result", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
         df = df[df['fdp_nominals'] == 0.2]
         df_ones.append(df)
     df = pd.concat(df_ones)
@@ -180,8 +189,8 @@ df_list = []
 
 for name in dataset_list:
     df_ones = []
-    for j in range(1, 101):
-        df = pd.read_csv(os.path.join("result", f"{name} 0.10", f"{name} 0.10 {j}.csv"))
+    for j in range(1, 1+n_itr):
+        df = pd.read_csv(os.path.join("result", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
         filtered_15_rb = df[df['fdps_15_rb'] <= 0.2]
         filtered_15_rp = df[df['fdps_15_rp'] <= 0.2]
         filtered_cs = df[df['fdps_cs'] <= 0.2]

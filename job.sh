@@ -15,8 +15,8 @@ mkdir -p $LOGS
 dataset_list=("3A4" "CB1" "DPP4" "HIVINT" "HIVPROT" "LOGD" "METAB" "NK1" "OX1" "OX2" "PGP" "PPB" "RAT_F" "TDI" "THROMBIN")
 
 for dataset in "${dataset_list[@]}"; do
-    for size in 0.1 1.0; do
-        for seed in {1..10}; do
+    for size in 1.0; do
+        for seed in {1..100}; do
             # Assemble slurm order for this job
             JOBN=$dataset"_"$size"_"$seed
 
