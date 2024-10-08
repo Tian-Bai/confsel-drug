@@ -38,15 +38,15 @@ for i, name in enumerate(dataset_list):
     if i == 0:
         # Plot data for each model and conformal method
         line1, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_15_rb'], 
-                        label='Sheridan-bin', marker='o', color='steelblue', alpha=0.8)
+                        label='eCounterscreen-bin', marker='o', color='steelblue', alpha=0.8)
         
         line2, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_15_rp'], 
-                        label='Sheridan-pred', marker='o', color='orange', alpha=0.8)
+                        label='eCounterscreen-pred', marker='o', color='orange', alpha=0.8)
         
         line3, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_cs'], 
                         label='Conformal Selection', marker='o', color='darkgreen', alpha=0.8)
         
-        ax.legend(loc='best', bbox_to_anchor=(4, -3), frameon=True, shadow=False, ncol=3, fontsize=12)
+        ax.legend(loc='best', bbox_to_anchor=(4.2, -3), frameon=True, shadow=False, ncol=3, fontsize=12)
     else:
         ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_15_rb'], 
                 marker='o', color='steelblue', alpha=0.8)
@@ -93,15 +93,15 @@ for i, name in enumerate(dataset_list):
     if i == 0:
         # Plot data for each model and conformal method
         line1, = ax.plot(df_list[i]['fdps_15_rb'], df_list[i]['powers_15_rb'], 
-                        label='Sheridan-bin', marker='o', color='steelblue', alpha=0.8)
+                        label='eCounterscreen-bin', marker='o', color='steelblue', alpha=0.8)
         
         line2, = ax.plot(df_list[i]['fdps_15_rp'], df_list[i]['powers_15_rp'], 
-                        label='Sheridan-pred', marker='o', color='orange', alpha=0.8)
+                        label='eCounterscreen-pred', marker='o', color='orange', alpha=0.8)
         
         line3, = ax.plot(df_list[i]['fdps_cs'], df_list[i]['powers_cs'], 
                         label='Conformal Selection', marker='o', color='darkgreen', alpha=0.8)
         
-        ax.legend(loc='best', bbox_to_anchor=(4, -3), frameon=True, shadow=False, ncol=3, fontsize=12)
+        ax.legend(loc='best', bbox_to_anchor=(4.2, -3), frameon=True, shadow=False, ncol=3, fontsize=12)
     else:
         ax.plot(df_list[i]['fdps_15_rb'], df_list[i]['powers_15_rb'], 
                 marker='o', color='steelblue', alpha=0.8)
