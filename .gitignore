@@ -1,3 +1,5 @@
 *.csv
 *.png
 *.txt
+.ipynb_checkpoints/
+result/
