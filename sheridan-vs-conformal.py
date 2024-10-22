@@ -95,6 +95,8 @@ with Timer() as timer:
     for s in sim_calib:
         filtered_RMSE_df = RMSE_df[(s - 0.05 <= RMSE_df["dice"]) & (RMSE_df["dice"] <= s + 0.05)]
         rmse = filtered_RMSE_df["RMSE"].mean()
+        # rmse = np.mean(filtered_RMSE_df["RMSE"].to_numpy() ** 2)
+        # rmse = np.sqrt(rmse)
         rmse_calib.append(rmse)
     rmse_calib = np.array(rmse_calib)
 
@@ -111,6 +113,8 @@ with Timer() as timer:
     for s in sim_test:
         filtered_RMSE_df = RMSE_df[(s - 0.05 <= RMSE_df["dice"]) & (RMSE_df["dice"] <= s + 0.05)]
         rmse = filtered_RMSE_df["RMSE"].mean()
+        # rmse = np.mean(filtered_RMSE_df["RMSE"].to_numpy() ** 2)
+        # rmse = np.sqrt(rmse)
         rmse_test.append(rmse)
     rmse_test = np.array(rmse_test)
 
