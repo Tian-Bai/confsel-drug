@@ -22,7 +22,10 @@ dataset_list = ['3A4', 'CB1', 'DPP4', 'HIVINT', 'HIVPROT', 'LOGD', 'METAB', 'NK1
 for name in dataset_list:
     df_ones = []
     for j in range(1, 1+n_itr):
-        df = pd.read_csv(os.path.join("result", f"{sample:.2f}", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
+        try:
+            df = pd.read_csv(os.path.join("result", f"{sample:.2f}", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
+        except FileNotFoundError as e:
+            print(e)
         df_ones.append(df)
     df = pd.concat(df_ones).groupby("fdp_nominals", as_index=False).mean()
     df_list.append(df)
