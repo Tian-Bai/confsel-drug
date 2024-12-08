@@ -7,11 +7,11 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('sample', type=float)
-parser.add_argument('seed', type=int)
+parser.add_argument('n_itr', type=int)
 args = parser.parse_args()
 
 sample = args.sample
-n_itr = args.seed
+n_itr = args.n_itr
 
 # Set ggplot style for the plots
 plt.style.use('ggplot')
@@ -134,110 +134,3 @@ fig.text(0.03, 0.5, 'Observed Power', va='center', rotation='vertical', fontsize
 # Display the plot
 plt.savefig(os.path.join("pic", "power.png"))
 # plt.show()
-
-# ''''''''''''
-# # Assume dataset_list is already defined
-# df_list = []
-
-# for name in dataset_list:
-#     df_ones = []
-#     for j in range(1, 1+n_itr):
-#         df = pd.read_csv(os.path.join("result", f"{sample:.2f}", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
-#         df = df[df['fdp_nominals'] == 0.2]
-#         df_ones.append(df)
-#     df = pd.concat(df_ones)
-#     df_list.append(df)
-
-# fig, axs = plt.subplots(nrows=3, ncols=5, figsize=(18, 12))
-# axs = axs.flatten()
-
-# # Define colors for the three boxplots
-# colors = ['steelblue', 'orange', 'darkgreen']
-
-# for i, name in enumerate(dataset_list):
-#     ax = axs[i]
-
-#     # Prepare data for the 3 boxplots (each array separately)
-#     data = pd.DataFrame({
-#         'bin': df_list[i]['fdps_15_rb'],
-#         'pred': df_list[i]['fdps_15_rp'],
-#         'cs': df_list[i]['fdps_cs']
-#     })
-
-#     # Create boxplot using seaborn
-#     sns.boxplot(data=data, ax=ax, palette=colors, showfliers=True, width=0.5, showmeans=True, 
-#                 meanprops={'markerfacecolor':'red', 
-#                           'markeredgecolor':'red'})
-    
-#     ax.axhline(y=0.2, color='grey', linestyle='-.')
-
-#     # Set title
-#     ax.set_title(f'{name}', fontsize=12)
-
-#     # Customize grid
-#     ax.grid(True, linestyle='--', alpha=0.7)
-
-# # Adjust spacing between subplots
-# fig.subplots_adjust(wspace=0.2, hspace=0.3, top=0.9, bottom=0.13, left=0.07, right=0.96)
-
-# # Add global x and y labels, move them slightly outward
-# fig.text(0.5, 0.07, 'Observed FDP', ha='center', fontsize=14)
-# fig.text(0.03, 0.5, 'Selection Methods', va='center', rotation='vertical', fontsize=14)
-
-# # Save the plot to a file
-# plt.savefig(os.path.join("pic", "fdp-box.png"))
-
-# ''''''''''''
-# df_list = []
-
-# for name in dataset_list:
-#     df_ones = []
-#     for j in range(1, 1+n_itr):
-#         df = pd.read_csv(os.path.join("result", f"{sample:.2f}", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
-#         filtered_15_rb = df[df['fdps_15_rb'] <= 0.2]
-#         filtered_15_rp = df[df['fdps_15_rp'] <= 0.2]
-#         filtered_cs = df[df['fdps_cs'] <= 0.2]
-
-#         # Find the maximum powers where the condition holds
-#         df = pd.DataFrame({
-#             'powers_15_rb': [filtered_15_rb['powers_15_rb'].max()],
-#             'powers_15_rp': [filtered_15_rp['powers_15_rp'].max()],
-#             'powers_cs': [filtered_cs['powers_cs'].max()]
-#         }).fillna(0)
-#         df_ones.append(df)
-#     df = pd.concat(df_ones)
-#     df_list.append(df)
-
-# fig, axs = plt.subplots(nrows=3, ncols=5, figsize=(18, 12))
-# axs = axs.flatten()
-
-# for i, name in enumerate(dataset_list):
-#     ax = axs[i]
-
-#     # Prepare data for the 3 boxplots (each array separately)
-#     data = pd.DataFrame({
-#         'bin': df_list[i]['powers_15_rb'],
-#         'pred': df_list[i]['powers_15_rp'],
-#         'cs': df_list[i]['powers_cs']
-#     })
-
-#     # Create boxplot using seaborn
-#     sns.boxplot(data=data, ax=ax, palette=colors, showfliers=True, width=0.5, showmeans=True, 
-#                 meanprops={'markerfacecolor':'red', 
-#                           'markeredgecolor':'red'})
-
-#     # Set title
-#     ax.set_title(f'{name}', fontsize=12)
-
-#     # Customize grid
-#     ax.grid(True, linestyle='--', alpha=0.7)
-
-# # Adjust spacing between subplots
-# fig.subplots_adjust(wspace=0.2, hspace=0.3, top=0.9, bottom=0.13, left=0.07, right=0.96)
-
-# # Add global x and y labels, move them slightly outward
-# fig.text(0.5, 0.07, 'Observed Power', ha='center', fontsize=14)
-# fig.text(0.03, 0.5, 'Selection Methods', va='center', rotation='vertical', fontsize=14)
-
-# # Save the plot to a file
-# plt.savefig(os.path.join("pic", "power-box.png"))

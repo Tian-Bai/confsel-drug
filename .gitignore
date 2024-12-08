@@ -1,5 +1,12 @@
 *.csv
 *.png
 *.txt
+*.sh
+*.ps1
+
+adme.ipynb
 .ipynb_checkpoints/
 result/
+result_rmse/
+pic/
+data/

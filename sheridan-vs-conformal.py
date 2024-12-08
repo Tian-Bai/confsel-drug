@@ -7,67 +7,46 @@ import random
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, accuracy_score
 import argparse
-from utility import BH, Timer
-
-def dice_sim(f, set_of_f):
-    f = np.array(f)
-    set_of_f = np.array(set_of_f) 
-
-    min_count = np.minimum(f, set_of_f).sum(axis=1) * 2
-    sum_count = f.sum() + set_of_f.sum(axis=1)
-    sum_count[sum_count == 0] = 1
-    return np.max(min_count / sum_count)
-
-def eval(Y, rejected, lower, higher):
-    true_reject = np.sum((lower < Y) & (Y < higher))
-    if len(rejected) == 0:
-        fdp = 0
-        pcer = 0
-        power = 0
-    else:
-        fdp = np.sum((lower >= Y[rejected]) | (Y[rejected] >= higher)) / len(rejected)
-        pcer = np.sum((lower >= Y[rejected]) | (Y[rejected] >= higher)) / len(Y)
-        power = np.sum((lower < Y[rejected]) & (Y[rejected] < higher)) / true_reject if true_reject != 0 else 0
-    return fdp, pcer, power
+from utility import conf_pval, BH, eval, dice_sim, thresholds_map, Timer
 
 parser = argparse.ArgumentParser()
-parser.add_argument('dataset', type=str)
-parser.add_argument('sample', type=float)
+parser.add_argument('dataset', type=str) # the name of the dataset to use
+parser.add_argument('sample', type=float) # percentage of the dataset to consider
 parser.add_argument('seed', type=int)
 args = parser.parse_args()
 
 random.seed(args.seed)
+np.random.seed(args.seed)
 
 dataset_name = args.dataset
 dataset_path = os.path.join('data', f'{dataset_name}_training_disguised.csv')
 
 dataset = pd.read_csv(dataset_path)
 
+assert 0 < args.sample < 1
 if args.sample < 1:
     dataset = dataset.sample(frac=args.sample)
 
-thresholds_map = {'NK1': 6.5, 'PGP': -0.3, 'LOGD': 1.5, '3A4': 4.35, 'CB1': 6.5, 'DPP4': 6, 'HIVINT': 6, 'HIVPROT': 4.5, 'METAB': 40, 'OX1': 5, 'OX2': 6, 'PPB': 1, 'RAT_F': 0.3, 'TDI': 0, 'THROMBIN': 6}
-# thresholds_map = {'NK1': 9.5, 'PGP': 0.5, 'LOGD': 4, '3A4': 4.5, 'CB1': 8.0, 'DPP4': 6.5, 'HIVINT': 7, 'HIVPROT': 9, 'METAB': 70, 'OX1': 7.5, 'OX2': 8, 'PPB': 2, 'RAT_F': 1.7, 'TDI': 1, 'THROMBIN': 7}
 threshold = thresholds_map[dataset_name]
 
 total_Y = dataset['Act'].to_numpy()
 total_X = dataset.drop(columns=['MOLECULE', 'Act']).to_numpy()
 
-Xtc, Xtest, Ytc, Ytest = train_test_split(total_X, total_Y, test_size=15/100, shuffle=True) # tc: train and calib
+Xtc, Xtest, Ytc, Ytest = train_test_split(total_X, total_Y, test_size=15/100, shuffle=True) # split 15% as the test data, and the rest for train and calib (tc)
 
-fdp_nominals = np.linspace(0.1, 0.5, 9)
-all_res = pd.DataFrame()
+fdp_nominals = np.round(np.linspace(0.1, 0.5, 9), 2) # nominal FDR levels
+all_res = pd.DataFrame() # results
 
 all_res['fdp_nominals'] = fdp_nominals
 
 ''' RMSE-bin (Sheridan 2004) '''
-# 15% test, 15% calib, for each RMSE accumulation, 50% train, 20% test
+# 15% calib, and for each RMSE accumulation, 50% train, 20% test
 # since data is limited in size in our case, we will only use 1d binning
 
 with Timer() as timer:
     Xtrain, Xcalib, Ytrain, Ycalib = train_test_split(Xtc, Ytc, train_size=70/85, shuffle=True)
 
-    # now only use Xtrain to do RMSE binning
+    # accumulate RMSE dataset
     rmse_df_list = []
     for k in range(5):
         Xtrain_1, Xtrain_2, Ytrain_1, Ytrain_2 = train_test_split(Xtrain, Ytrain, train_size=50/70, shuffle=True)
@@ -81,14 +60,15 @@ with Timer() as timer:
 
     RMSE_df = pd.concat(rmse_df_list, ignore_index=True)
 
-    # now use 50% of data to train rf
+    # Use 50% of data to train random forest
     rf = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
     Xtrain, _, Ytrain, _ = train_test_split(Xtrain, Ytrain, train_size=50/70, shuffle=True)
     rf.fit(Xtrain, Ytrain)
 
-    R_list = np.zeros(len(fdp_nominals)) # which threshold to use?
+    R_list = np.zeros(len(fdp_nominals)) # the threshold to use for each FDR level
     fdps_15_rb, pcers_15_rb, powers_15_rb = [], [], []
 
+    # get z scores for calibration
     Ypred_calib = rf.predict(Xcalib)
     sim_calib = np.array([dice_sim(x, Xtrain) for x in Xcalib])
     rmse_calib = []
@@ -102,11 +82,13 @@ with Timer() as timer:
 
     z_calib = (threshold - Ypred_calib) / rmse_calib
 
+    # search for proper R levels
     for R in np.linspace(0.5, -2, 200):
         try_r_sel = [j for j in range(len(z_calib)) if z_calib[j] >= R]
-        try_fdp, _, _ = eval(Ycalib, try_r_sel, -100, threshold)
+        try_fdp, _, _ = eval(Ycalib, try_r_sel, -np.inf, threshold)
         R_list[fdp_nominals >= try_fdp] = R
 
+    # get z scores for test
     Ypred_test = rf.predict(Xtest)
     sim_test = np.array([dice_sim(x, Xtrain) for x in Xtest])
     rmse_test = []
@@ -120,9 +102,10 @@ with Timer() as timer:
 
     z_test = (threshold - Ypred_test) / rmse_test
 
+    # conduct selection, and evaluate performance
     for i, R in enumerate(R_list):
         sheridan_15 = [j for j in range(len(z_test)) if z_test[j] >= R]
-        fdp, pcer, power = eval(Ytest, sheridan_15, -100, threshold)
+        fdp, pcer, power = eval(Ytest, sheridan_15, -np.inf, threshold)
         fdps_15_rb.append(fdp)
         pcers_15_rb.append(pcer)
         powers_15_rb.append(power)
@@ -133,9 +116,10 @@ all_res['powers_15_rb'] = powers_15_rb
 all_res['time_15_rb'] = [timer.runtime] * len(fdp_nominals)
 
 ''' RMSE-pred (Sheridan 2013) '''
-# 15% test, 15% calib, 50% train rf, 20% train rmse
+# Similar to RMSE-bin, but use error models instead of RMSE accumulation
 
 with Timer() as timer:
+    # fit random forest regressor and error model
     rf = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
     rf_rmse = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
     Xtrain, Xcalib, Ytrain, Ycalib = train_test_split(Xtc, Ytc, train_size=70/85, shuffle=True)
@@ -148,9 +132,10 @@ with Timer() as timer:
 
     rf_rmse.fit(np.column_stack((Ytrain_rmse_pred, var_train_rmse)), np.abs(Ytrain_rmse - Ytrain_rmse_pred))
 
-    R_list = np.zeros(len(fdp_nominals)) # which threshold to use?
+    R_list = np.zeros(len(fdp_nominals))
     fdps_15_rp, pcers_15_rp, powers_15_rp = [], [], []
 
+    # get z scores for calibration
     Ypred_calib = rf.predict(Xcalib)
     all_Ypred = np.column_stack([tree.predict(Xcalib) for tree in rf.estimators_])
     var_calib = np.var(all_Ypred, axis=1)
@@ -159,11 +144,13 @@ with Timer() as timer:
 
     z_calib = (threshold - Ypred_calib) / rmse_calib
 
+    # search for proper R levels
     for R in np.linspace(0.5, -2, 200):
         try_r_sel = [j for j in range(len(z_calib)) if z_calib[j] >= R]
-        try_fdp, _, _ = eval(Ycalib, try_r_sel, -100, threshold)
+        try_fdp, _, _ = eval(Ycalib, try_r_sel, -np.inf, threshold)
         R_list[fdp_nominals >= try_fdp] = R
 
+    # get z scores for test
     Ypred_test = rf.predict(Xtest)
     all_Ypred = np.column_stack([tree.predict(Xtest) for tree in rf.estimators_])
     var_test = np.var(all_Ypred, axis=1)
@@ -173,7 +160,7 @@ with Timer() as timer:
 
     for i, R in enumerate(R_list):
         sheridan_15 = [j for j in range(len(z_test)) if z_test[j] >= R]
-        fdp, pcer, power = eval(Ytest, sheridan_15, -100, threshold)
+        fdp, pcer, power = eval(Ytest, sheridan_15, -np.inf, threshold)
         fdps_15_rp.append(fdp)
         pcers_15_rp.append(pcer)
         powers_15_rp.append(power)
@@ -184,10 +171,10 @@ all_res['powers_15_rp'] = powers_15_rp
 all_res['time_15_rp'] = [timer.runtime] * len(fdp_nominals) # time them together
 
 ''' conformal selection method '''
-# 15% test, 35% calibration, 50% train
-# in fact more can be used to train, but for a fair comparison, ...
+# 35% calibration, 50% train
 
 with Timer() as timer:
+    # fit random forest regressor
     rf = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
     Xtrain, Xcalib, Ytrain, Ycalib = train_test_split(Xtc, Ytc, train_size=50/85, shuffle=True)
     rf.fit(Xtrain, Ytrain < threshold)
@@ -195,10 +182,12 @@ with Timer() as timer:
     fdps_cs, pcers_cs, powers_cs = [], [], []
 
     for i, fdp_nominal in enumerate(fdp_nominals):
-        calib_scores_2clip = 1000 * (Ycalib < threshold) - rf.predict(Xcalib)   # Ycalib_cs > 0.5 <=> original Ycalib_cs < threshold
+        calib_scores = 1000 * (Ycalib < threshold) - rf.predict(Xcalib)
         test_scores = -rf.predict(Xtest)
-        BH_2clip = BH(calib_scores_2clip, test_scores, fdp_nominal)
-        fdp, pcer, power = eval(Ytest, BH_2clip, -100, threshold)
+
+        pvals = conf_pval(calib_scores, test_scores)
+        sel = BH(pvals, fdp_nominal)
+        fdp, pcer, power = eval(Ytest, sel, -np.inf, threshold)
         fdps_cs.append(fdp)
         pcers_cs.append(pcer)
         powers_cs.append(power)
@@ -208,8 +197,8 @@ all_res['pcers_cs'] = pcers_cs
 all_res['powers_cs'] = powers_cs
 all_res['time_cs'] = [timer.runtime] * len(fdp_nominals)
 
+# save the results
 out_dir = os.path.join('result', f'{dataset_name} {args.sample:.2f}')
-
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
