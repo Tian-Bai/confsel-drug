@@ -23,7 +23,7 @@ dataset_path = os.path.join('data', f'{dataset_name}_training_disguised.csv')
 
 dataset = pd.read_csv(dataset_path)
 
-assert 0 < args.sample < 1
+assert 0 < args.sample and args.sample <= 1
 if args.sample < 1:
     dataset = dataset.sample(frac=args.sample)
 
