@@ -34,7 +34,8 @@ total_X = dataset.drop(columns=['MOLECULE', 'Act']).to_numpy()
 
 Xtc, Xtest, Ytc, Ytest = train_test_split(total_X, total_Y, test_size=15/100, shuffle=True) # split 15% as the test data, and the rest for train and calib (tc)
 
-fdp_nominals = np.round(np.linspace(0.1, 0.5, 9), 2) # nominal FDR levels
+# fdp_nominals = np.round(np.linspace(0.1, 0.5, 9), 2) # nominal FDR levels
+fdp_nominals = np.round(np.linspace(0.05, 0.95, 19), 2) # nominal FDR levels
 all_res = pd.DataFrame() # results
 
 all_res['fdp_nominals'] = fdp_nominals
