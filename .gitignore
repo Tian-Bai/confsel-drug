@@ -1,7 +1,6 @@
 *.csv
 *.png
 *.txt
-*.sh
 *.ps1
 
 adme.ipynb

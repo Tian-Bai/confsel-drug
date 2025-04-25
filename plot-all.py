@@ -23,7 +23,7 @@ for name in dataset_list:
     df_ones = []
     for j in range(1, 1+n_itr):
         try:
-            df = pd.read_csv(os.path.join("result", f"{sample:.2f}", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
+            df = pd.read_csv(os.path.join("result_5_95", f"{sample:.2f}", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
         except FileNotFoundError as e:
             print(e)
         df_ones.append(df)
@@ -40,6 +40,7 @@ for i, name in enumerate(dataset_list):
 
     if i == 0:
         # Plot data for each model and conformal method
+        # print(df_list[i]['fdp_nominals'])
         line1, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_15_rb'], 
                         label='eCounterscreen-bin', marker='o', color='steelblue', alpha=0.8)
         
