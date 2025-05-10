@@ -18,10 +18,10 @@ for dataset in "${dataset_list[@]}"; do
     for size in 1.0; do
         for seed in {1..100}; do
             # Assemble slurm order for this job
-            JOBN="3z_"$dataset"_"$size"_"$seed
+            JOBN="fop_"$dataset"_"$size"_"$seed
 
             # Submit the job
-            SCRIPT="submit-3z.sh $dataset $size $seed"
+            SCRIPT="submit-fop.sh $dataset $size $seed"
                 
             OUTF=$LOGS"/"$JOBN".out"
             ERRF=$LOGS"/"$JOBN".err"

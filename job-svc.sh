@@ -18,7 +18,7 @@ for dataset in "${dataset_list[@]}"; do
     for size in 1.0; do
         for seed in {1..100}; do
             # Assemble slurm order for this job
-            JOBN=$dataset"_"$size"_"$seed
+            JOBN="svc_"$dataset"_"$size"_"$seed
 
             # Submit the job
             SCRIPT="submit-svc.sh $dataset $size $seed"
