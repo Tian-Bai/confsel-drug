@@ -23,7 +23,7 @@ for name in dataset_list:
     df_ones = []
     for j in range(1, 1+n_itr):
         try:
-            df = pd.read_csv(os.path.join("result_5_95", f"{sample:.2f}", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
+            df = pd.read_csv(os.path.join("result", f"{sample:.2f}", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
         except FileNotFoundError as e:
             print(e)
         df_ones.append(df)
@@ -74,8 +74,8 @@ for i, name in enumerate(dataset_list):
 fig.subplots_adjust(wspace=0.2, hspace=0.3, top=0.9, bottom=0.13, left=0.07, right=0.96)
 
 # Add global x and y labels, move them slightly outward
-fig.text(0.5, 0.07, 'Nominal FDP', ha='center', fontsize=14)  # Moved down slightly
-fig.text(0.03, 0.5, 'Observed FDP', va='center', rotation='vertical', fontsize=14)  # Moved left slightly
+fig.text(0.5, 0.07, 'Nominal FDR', ha='center', fontsize=14)  # Moved down slightly
+fig.text(0.03, 0.5, 'Observed FDR', va='center', rotation='vertical', fontsize=14)  # Moved left slightly
 
 # Title for the entire plot
 # fig.suptitle("FDP Control for all 15 Datasets", fontsize=16)
@@ -126,7 +126,7 @@ for i, name in enumerate(dataset_list):
 fig.subplots_adjust(wspace=0.2, hspace=0.3, top=0.9, bottom=0.13, left=0.07, right=0.96)
 
 # Add global x and y labels, move them slightly outward
-fig.text(0.5, 0.07, 'Observed FDP', ha='center', fontsize=14)  # Moved down slightly
+fig.text(0.5, 0.07, 'Observed FDR', ha='center', fontsize=14)  # Moved down slightly
 fig.text(0.03, 0.5, 'Observed Power', va='center', rotation='vertical', fontsize=14)  # Moved left slightly
 
 # Title for the entire plot

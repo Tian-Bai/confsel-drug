@@ -48,7 +48,7 @@ for i, name in enumerate(dataset_list):
                         label='Green Zone FDR', marker='o', color='steelblue', alpha=0.8)
         
         line2, = ax.plot(df_list[i]['fdp_nominal'], df_list[i]['red_fdp'], 
-                        label='Green/Grey Zone FOR', marker='o', color='orange', alpha=0.8)
+                        label='Red Zone FOR', marker='o', color='orange', alpha=0.8)
         
         ax.legend(loc='best', bbox_to_anchor=(3.7, -3), frameon=True, shadow=False, ncol=3, fontsize=12)
     else:
@@ -74,7 +74,7 @@ for i, name in enumerate(dataset_list):
 fig.subplots_adjust(wspace=0.2, hspace=0.3, top=0.9, bottom=0.13, left=0.07, right=0.96)
 
 # Add global x and y labels, move them slightly outward
-fig.text(0.5, 0.07, 'Nominal FDR/FOR', ha='center', fontsize=14)  # Moved down slightly
+fig.text(0.5, 0.07, 'Nominal FDR', ha='center', fontsize=14)  # Moved down slightly
 fig.text(0.03, 0.5, 'Observed FDP/FOR', va='center', rotation='vertical', fontsize=14)  # Moved left slightly
 
 # Title for the entire plot
@@ -120,7 +120,7 @@ for i, name in enumerate(dataset_list):
 fig.subplots_adjust(wspace=0.2, hspace=0.3, top=0.9, bottom=0.13, left=0.07, right=0.96)
 
 # Add global x and y labels, move them slightly outward
-fig.text(0.5, 0.07, 'Nominal FDR/FOR', ha='center', fontsize=14)  # Moved down slightly
+fig.text(0.5, 0.07, 'Nominal FDR', ha='center', fontsize=14)  # Moved down slightly
 fig.text(0.03, 0.5, 'Observed Power', va='center', rotation='vertical', fontsize=14)  # Moved left slightly
 
 # Title for the entire plot
