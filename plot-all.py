@@ -50,7 +50,7 @@ for i, name in enumerate(dataset_list):
         line3, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_cs'], 
                         label='Conformal Selection', marker='o', color='darkgreen', alpha=0.8)
         
-        ax.legend(loc='best', bbox_to_anchor=(4.2, -3), frameon=True, shadow=False, ncol=3, fontsize=12)
+        ax.legend(loc='best', bbox_to_anchor=(5.2, -2.9), frameon=True, shadow=False, ncol=3, fontsize=21)
     else:
         ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_15_rb'], 
                 marker='o', color='steelblue', alpha=0.8)
@@ -65,23 +65,30 @@ for i, name in enumerate(dataset_list):
     ax.plot([0.05, 0.55], [0.05, 0.55], color='grey', alpha=0.7, linestyle='-.')
 
     # Set axis labels
-    ax.set_title(f'{name}', fontsize=12)
+    ax.set_title(f'{name}', fontsize=18)
+    ax.tick_params(axis='both', labelsize=11)
 
     # Add grid lines
     ax.grid(True)
+
+for ax in axs:
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_linewidth(1.2)
+        spine.set_edgecolor('gray')
 
 # Adjust spacing between subplots
 fig.subplots_adjust(wspace=0.2, hspace=0.3, top=0.9, bottom=0.13, left=0.07, right=0.96)
 
 # Add global x and y labels, move them slightly outward
-fig.text(0.5, 0.07, 'Nominal FDR', ha='center', fontsize=14)  # Moved down slightly
-fig.text(0.03, 0.5, 'Observed FDR', va='center', rotation='vertical', fontsize=14)  # Moved left slightly
+fig.text(0.5, 0.07, 'Nominal FDR', ha='center', fontsize=22)  # Moved down slightly
+fig.text(0.03, 0.5, 'Observed FDR', va='center', rotation='vertical', fontsize=22)  # Moved left slightly
 
 # Title for the entire plot
 # fig.suptitle("FDP Control for all 15 Datasets", fontsize=16)
 
 # Display the plot
-plt.savefig(os.path.join("pic", "fdp.png"))
+plt.savefig(os.path.join("pic", "fdp.pdf"))
 # plt.show()
 
 ''''''''''''
@@ -105,7 +112,7 @@ for i, name in enumerate(dataset_list):
         line3, = ax.plot(df_list[i]['fdps_cs'], df_list[i]['powers_cs'], 
                         label='Conformal Selection', marker='o', color='darkgreen', alpha=0.8)
         
-        ax.legend(loc='best', bbox_to_anchor=(4.2, -3), frameon=True, shadow=False, ncol=3, fontsize=12)
+        ax.legend(loc='best', bbox_to_anchor=(5.2, -2.9), frameon=True, shadow=False, ncol=3, fontsize=21)
     else:
         ax.plot(df_list[i]['fdps_15_rb'], df_list[i]['powers_15_rb'], 
                 marker='o', color='steelblue', alpha=0.8)
@@ -117,21 +124,28 @@ for i, name in enumerate(dataset_list):
                 marker='o', color='darkgreen', alpha=0.8)
 
     # Set axis labels
-    ax.set_title(f'{name}', fontsize=12)
+    ax.set_title(f'{name}', fontsize=18)
+    ax.tick_params(axis='both', labelsize=11)
 
     # Add grid lines
     ax.grid(True)
+
+for ax in axs:
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_linewidth(1.2)
+        spine.set_edgecolor('gray')
 
 # Adjust spacing between subplots
 fig.subplots_adjust(wspace=0.2, hspace=0.3, top=0.9, bottom=0.13, left=0.07, right=0.96)
 
 # Add global x and y labels, move them slightly outward
-fig.text(0.5, 0.07, 'Observed FDR', ha='center', fontsize=14)  # Moved down slightly
-fig.text(0.03, 0.5, 'Observed Power', va='center', rotation='vertical', fontsize=14)  # Moved left slightly
+fig.text(0.5, 0.07, 'Observed FDR', ha='center', fontsize=22)  # Moved down slightly
+fig.text(0.03, 0.5, 'Observed Power', va='center', rotation='vertical', fontsize=22)  # Moved left slightly
 
 # Title for the entire plot
 # fig.suptitle("Power for all 15 Datasets", fontsize=16)
 
 # Display the plot
-plt.savefig(os.path.join("pic", "power.png"))
+plt.savefig(os.path.join("pic", "power.pdf"))
 # plt.show()

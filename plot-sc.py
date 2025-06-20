@@ -8,12 +8,10 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('sample', type=float)
 parser.add_argument('n_itr', type=int)
-parser.add_argument('fop_nominal', type=float)
 args = parser.parse_args()
 
 sample = args.sample
 n_itr = args.n_itr
-fop_nominal = args.fop_nominal
 
 # Set ggplot style for the plots
 plt.style.use('ggplot')
@@ -25,12 +23,14 @@ for name in dataset_list:
     df_ones = []
     for j in range(1, 1+n_itr):
         try:
-            df = pd.read_csv(os.path.join("result_3z", f"{sample:.2f}", f"3zone {name} {sample:.2f}", f"3zone {name} {sample:.2f} {j}.csv"))
-            df = df[df['fop_nominal'] == fop_nominal]
+            df = pd.read_csv(os.path.join("result_sc", f"{sample:.2f}", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
         except FileNotFoundError as e:
             print(e)
         df_ones.append(df)
-    df = pd.concat(df_ones).groupby("fdp_nominal", as_index=False).mean()
+    df = pd.concat(df_ones).groupby("fdp_nominals", as_index=False).mean()
+
+    # if only to q=0.5
+    df = df[df['fdp_nominals'] <= 0.5]
     df_list.append(df)
 
 # Create a grid for subplots
@@ -43,26 +43,29 @@ for i, name in enumerate(dataset_list):
 
     if i == 0:
         # Plot data for each model and conformal method
-        # print(df_list[i]['fdp_nominal'])
-        line1, = ax.plot(df_list[i]['fdp_nominal'], df_list[i]['green_fdp'], 
-                        label='Green Zone FDR', marker='o', color='steelblue', alpha=0.8)
+        # print(df_list[i]['fdp_nominals'])
+        line1, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_clip'], 
+                        label='clipped score', marker='o', color='steelblue', alpha=0.8)
         
-        line2, = ax.plot(df_list[i]['fdp_nominal'], df_list[i]['red_fdp'], 
-                        label='Red Zone FOR', marker='o', color='orange', alpha=0.8)
+        line2, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_res'], 
+                        label='signed error score', marker='o', color='orange', alpha=0.8)
         
-        ax.legend(loc='best', bbox_to_anchor=(4.2, -2.9), frameon=True, shadow=False, ncol=3, fontsize=21)
+        line3, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_clip_s'], 
+                        label='clipped score with $\sigma$', marker='o', color='darkgreen', alpha=0.8)
+        
+        ax.legend(loc='best', bbox_to_anchor=(5.2, -2.9), frameon=True, shadow=False, ncol=3, fontsize=21)
     else:
-        ax.plot(df_list[i]['fdp_nominal'], df_list[i]['green_fdp'], 
+        ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_clip'], 
                 marker='o', color='steelblue', alpha=0.8)
         
-        ax.plot(df_list[i]['fdp_nominal'], df_list[i]['red_fdp'], 
+        ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_res'], 
                 marker='o', color='orange', alpha=0.8)
         
+        ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_clip_s'], 
+                marker='o', color='darkgreen', alpha=0.8)
 
     # Reference line for y=x
     ax.plot([0.05, 0.55], [0.05, 0.55], color='grey', alpha=0.7, linestyle='-.')
-    
-    ax.axhline(fop_nominal, color='grey', alpha=0.7, linestyle='-.')
 
     # Set axis labels
     ax.set_title(f'{name}', fontsize=18)
@@ -82,13 +85,13 @@ fig.subplots_adjust(wspace=0.2, hspace=0.3, top=0.9, bottom=0.13, left=0.07, rig
 
 # Add global x and y labels, move them slightly outward
 fig.text(0.5, 0.07, 'Nominal FDR', ha='center', fontsize=22)  # Moved down slightly
-fig.text(0.03, 0.5, 'Observed FDP/FOR', va='center', rotation='vertical', fontsize=22)  # Moved left slightly
+fig.text(0.03, 0.5, 'Observed FDR', va='center', rotation='vertical', fontsize=22)  # Moved left slightly
 
 # Title for the entire plot
 # fig.suptitle("FDP Control for all 15 Datasets", fontsize=16)
 
 # Display the plot
-plt.savefig(os.path.join("pic", "3zfdp.pdf"))
+plt.savefig(os.path.join("pic", "fdp_sc.pdf"))
 # plt.show()
 
 ''''''''''''
@@ -103,19 +106,25 @@ for i, name in enumerate(dataset_list):
 
     if i == 0:
         # Plot data for each model and conformal method
-        line1, = ax.plot(df_list[i]['fdp_nominal'], df_list[i]['green_power'], 
-                        label='Green Zone Power', marker='o', color='steelblue', alpha=0.8)
+        line1, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_clip'], 
+                        label='clipped score', marker='o', color='steelblue', alpha=0.8)
         
-        line2, = ax.plot(df_list[i]['fdp_nominal'], df_list[i]['red_power'], 
-                        label='Red Zone Power', marker='o', color='orange', alpha=0.8)
+        line2, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_res'], 
+                        label='signed error score', marker='o', color='orange', alpha=0.8)
         
-        ax.legend(loc='best', bbox_to_anchor=(4.3, -2.9), frameon=True, shadow=False, ncol=3, fontsize=21)
+        line3, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_clip_s'], 
+                        label='clipped score with $\sigma$', marker='o', color='darkgreen', alpha=0.8)
+        
+        ax.legend(loc='best', bbox_to_anchor=(5.2, -2.9), frameon=True, shadow=False, ncol=3, fontsize=21)
     else:
-        ax.plot(df_list[i]['fdp_nominal'], df_list[i]['green_power'], 
+        ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_clip'], 
                 marker='o', color='steelblue', alpha=0.8)
         
-        ax.plot(df_list[i]['fdp_nominal'], df_list[i]['red_power'], 
+        ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_res'], 
                 marker='o', color='orange', alpha=0.8)
+        
+        ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_clip_s'], 
+                marker='o', color='darkgreen', alpha=0.8)
 
     # Set axis labels
     ax.set_title(f'{name}', fontsize=18)
@@ -141,5 +150,5 @@ fig.text(0.03, 0.5, 'Observed Power', va='center', rotation='vertical', fontsize
 # fig.suptitle("Power for all 15 Datasets", fontsize=16)
 
 # Display the plot
-plt.savefig(os.path.join("pic", "3zpower.pdf"))
+plt.savefig(os.path.join("pic", "power_sc.pdf"))
 # plt.show()

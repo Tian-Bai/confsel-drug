@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 import os
 import seaborn as sns
 import argparse
@@ -53,23 +54,33 @@ for i, name in enumerate(dataset_list):
     ax.plot([0.02, 0.2], [0.02, 0.2], color='grey', alpha=0.7, linestyle='-.')
 
     # Set axis labels
-    ax.set_title(f'{name}', fontsize=12)
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+
+    ax.set_title(f'{name}', fontsize=18)
+    ax.tick_params(axis='both', labelsize=11)
 
     # Add grid lines
     ax.grid(True)
+
+for ax in axs:
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_linewidth(1.2)
+        spine.set_edgecolor('gray')
 
 # Adjust spacing between subplots
 fig.subplots_adjust(wspace=0.2, hspace=0.3, top=0.9, bottom=0.13, left=0.07, right=0.96)
 
 # Add global x and y labels, move them slightly outward
-fig.text(0.5, 0.07, 'Nominal FOR', ha='center', fontsize=14)  # Moved down slightly
-fig.text(0.03, 0.5, 'Observed FOR', va='center', rotation='vertical', fontsize=14)  # Moved left slightly
+fig.text(0.5, 0.07, 'Nominal FOR', ha='center', fontsize=22)  # Moved down slightly
+fig.text(0.02, 0.5, 'Observed FOR', va='center', rotation='vertical', fontsize=22)  # Moved left slightly
 
 # Title for the entire plot
 # fig.suptitle("FDP Control for all 15 Datasets", fontsize=16)
 
 # Display the plot
-plt.savefig(os.path.join("pic", "fop.png"))
+plt.savefig(os.path.join("pic", "fop.pdf"))
 # plt.show()
 
 ''''''''''''
@@ -93,21 +104,31 @@ for i, name in enumerate(dataset_list):
                 marker='o', color='steelblue', alpha=0.8)
     
     # Set axis labels
-    ax.set_title(f'{name}', fontsize=12)
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+
+    ax.set_title(f'{name}', fontsize=18)
+    ax.tick_params(axis='both', labelsize=11)
 
     # Add grid lines
     ax.grid(True)
+
+for ax in axs:
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_linewidth(1.2)
+        spine.set_edgecolor('gray')
 
 # Adjust spacing between subplots
 fig.subplots_adjust(wspace=0.2, hspace=0.3, top=0.9, bottom=0.13, left=0.07, right=0.96)
 
 # Add global x and y labels, move them slightly outward
-fig.text(0.5, 0.07, 'Observed FOR', ha='center', fontsize=14)  # Moved down slightly
-fig.text(0.03, 0.5, 'Observed Removal Power', va='center', rotation='vertical', fontsize=14)  # Moved left slightly
+fig.text(0.5, 0.07, 'Observed FOR', ha='center', fontsize=22)  # Moved down slightly
+fig.text(0.02, 0.5, 'Observed Removal Power', va='center', rotation='vertical', fontsize=22)  # Moved left slightly
 
 # Title for the entire plot
 # fig.suptitle("Power for all 15 Datasets", fontsize=16)
 
 # Display the plot
-plt.savefig(os.path.join("pic", "fop-power.png"))
+plt.savefig(os.path.join("pic", "fop-power.pdf"))
 # plt.show()
