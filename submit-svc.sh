@@ -1,3 +1,3 @@
 #!/bin/bash 
 
-python sheridan-vs-conformal.py $1 $2 $3
+python sheridan-vs-conformal.py $1 $2 $3 $4

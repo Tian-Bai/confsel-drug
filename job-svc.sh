@@ -13,15 +13,16 @@ LOGS=logs
 mkdir -p $LOGS
 
 dataset_list=("3A4" "CB1" "DPP4" "HIVINT" "HIVPROT" "LOGD" "METAB" "NK1" "OX1" "OX2" "PGP" "PPB" "RAT_F" "TDI" "THROMBIN")
+model="lin"
 
 for dataset in "${dataset_list[@]}"; do
     for size in 1.0; do
         for seed in {1..100}; do
             # Assemble slurm order for this job
-            JOBN="svc_"$dataset"_"$size"_"$seed
+            JOBN="svc_"$dataset"_"$size"_"$seed"_"$model
 
             # Submit the job
-            SCRIPT="submit-svc.sh $dataset $size $seed"
+            SCRIPT="submit-svc.sh $dataset $size $seed $model"
                 
             OUTF=$LOGS"/"$JOBN".out"
             ERRF=$LOGS"/"$JOBN".err"
