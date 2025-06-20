@@ -128,8 +128,8 @@ rf_rmse.fit(Xtrain_rmse, np.abs(Ytrain_rmse - Ytrain_rmse_pred))
 fdps_res_s, pcers_res_s, powers_res_s = [], [], []
 
 for i, fdp_nominal in enumerate(fdp_nominals):
-    calib_scores = -Ycalib - rf.predict(Xcalib)
-    test_scores = -threshold - rf.predict(Xtest)
+    calib_scores = (-Ycalib - rf.predict(Xcalib)) / rf_rmse.predict(Xcalib)
+    test_scores = (-threshold - rf.predict(Xtest)) / rf_rmse.predict(Xtest)
 
     pvals = conf_pval(calib_scores, test_scores)
     sel = BH(pvals, fdp_nominal)

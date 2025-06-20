@@ -48,21 +48,27 @@ for i, name in enumerate(dataset_list):
                         label='clipped score', marker='o', color='steelblue', alpha=0.8)
         
         line2, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_res'], 
-                        label='signed error score', marker='o', color='orange', alpha=0.8)
+                        label='signed error score', marker='o', color='orange', alpha=0.5)
         
         line3, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_clip_s'], 
-                        label='clipped score with $\sigma$', marker='o', color='darkgreen', alpha=0.8)
+                        label='clipped score with $\hat\sigma$', marker='o', color='darkgreen', alpha=0.8)
         
-        ax.legend(loc='best', bbox_to_anchor=(5.2, -2.9), frameon=True, shadow=False, ncol=3, fontsize=21)
+        line4, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_res_s'], 
+                        label='signed error score with $\hat\sigma$', marker='o', color='purple', alpha=0.5)
+        
+        ax.legend(loc='best', bbox_to_anchor=(5.85, -2.9), frameon=True, shadow=False, ncol=4, fontsize=21)
     else:
         ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_clip'], 
                 marker='o', color='steelblue', alpha=0.8)
         
         ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_res'], 
-                marker='o', color='orange', alpha=0.8)
+                marker='o', color='orange', alpha=0.5)
         
         ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_clip_s'], 
                 marker='o', color='darkgreen', alpha=0.8)
+        
+        ax.plot(df_list[i]['fdp_nominals'], df_list[i]['fdps_res_s'], 
+                marker='o', color='purple', alpha=0.5)
 
     # Reference line for y=x
     ax.plot([0.05, 0.55], [0.05, 0.55], color='grey', alpha=0.7, linestyle='-.')
@@ -110,21 +116,27 @@ for i, name in enumerate(dataset_list):
                         label='clipped score', marker='o', color='steelblue', alpha=0.8)
         
         line2, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_res'], 
-                        label='signed error score', marker='o', color='orange', alpha=0.8)
+                        label='signed error score', marker='o', color='orange', alpha=0.5)
         
         line3, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_clip_s'], 
-                        label='clipped score with $\sigma$', marker='o', color='darkgreen', alpha=0.8)
+                        label='clipped score with $\hat\sigma$', marker='o', color='darkgreen', alpha=0.8)
         
-        ax.legend(loc='best', bbox_to_anchor=(5.2, -2.9), frameon=True, shadow=False, ncol=3, fontsize=21)
+        line4, = ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_res_s'], 
+                        label='signed error score with $\hat\sigma$', marker='o', color='purple', alpha=0.5)
+        
+        ax.legend(loc='best', bbox_to_anchor=(5.85, -2.9), frameon=True, shadow=False, ncol=4, fontsize=21)
     else:
         ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_clip'], 
                 marker='o', color='steelblue', alpha=0.8)
         
         ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_res'], 
-                marker='o', color='orange', alpha=0.8)
+                marker='o', color='orange', alpha=0.5)
         
         ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_clip_s'], 
                 marker='o', color='darkgreen', alpha=0.8)
+        
+        ax.plot(df_list[i]['fdp_nominals'], df_list[i]['powers_res_s'], 
+                marker='o', color='purple', alpha=0.5)
 
     # Set axis labels
     ax.set_title(f'{name}', fontsize=18)
