@@ -13,6 +13,8 @@ args = parser.parse_args()
 sample = args.sample
 n_itr = args.n_itr
 
+model = 'lin'
+
 # Set ggplot style for the plots
 plt.style.use('ggplot')
 
@@ -23,11 +25,14 @@ for name in dataset_list:
     df_ones = []
     for j in range(1, 1+n_itr):
         try:
-            df = pd.read_csv(os.path.join("result", f"{sample:.2f}", f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
+            df = pd.read_csv(os.path.join(f"result", model, f"{name} {sample:.2f}", f"{name} {sample:.2f} {j}.csv"))
         except FileNotFoundError as e:
             print(e)
         df_ones.append(df)
     df = pd.concat(df_ones).groupby("fdp_nominals", as_index=False).mean()
+
+    # if to only 0.5
+    # df = df[df['fdp_nominals'] <= 0.5]
     df_list.append(df)
 
 # Create a grid for subplots

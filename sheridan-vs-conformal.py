@@ -27,7 +27,7 @@ def get_model(mdl_str):
     if mdl_str == 'lin':
         return LinearRegression()
     if mdl_str == 'nn':
-        return MLPRegressor(hidden_layer_sizes=[64, 32])
+        return MLPRegressor(hidden_layer_sizes=[32, 32])
 
 dataset_name = args.dataset
 dataset_path = os.path.join('data', f'{dataset_name}_training_disguised.csv')
