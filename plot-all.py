@@ -13,7 +13,7 @@ args = parser.parse_args()
 sample = args.sample
 n_itr = args.n_itr
 
-model = 'lin'
+model = 'nn'
 
 # Set ggplot style for the plots
 plt.style.use('ggplot')

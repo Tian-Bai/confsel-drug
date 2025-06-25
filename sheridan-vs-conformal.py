@@ -27,7 +27,7 @@ def get_model(mdl_str):
     if mdl_str == 'lin':
         return LinearRegression()
     if mdl_str == 'nn':
-        return MLPRegressor(hidden_layer_sizes=[32, 32])
+        return MLPRegressor(hidden_layer_sizes=[32, 32], max_iter=1000)
 
 dataset_name = args.dataset
 dataset_path = os.path.join('data', f'{dataset_name}_training_disguised.csv')
@@ -95,7 +95,7 @@ with Timer() as timer:
     z_calib = (threshold - Ypred_calib) / rmse_calib
 
     # search for proper R levels
-    for R in np.linspace(0.5, -2, 200):
+    for R in np.linspace(np.max(z_calib), np.min(z_calib), 200):
         try_r_sel = [j for j in range(len(z_calib)) if z_calib[j] >= R]
         try_fdp, _, _ = eval(Ycalib, try_r_sel, -np.inf, threshold)
         R_list[fdp_nominals >= try_fdp] = R
@@ -166,7 +166,7 @@ with Timer() as timer:
     z_calib = (threshold - Ypred_calib) / rmse_calib
 
     # search for proper R levels
-    for R in np.linspace(0.5, -2, 200):
+    for R in np.linspace(np.max(z_calib), np.min(z_calib), 200):
         try_r_sel = [j for j in range(len(z_calib)) if z_calib[j] >= R]
         try_fdp, _, _ = eval(Ycalib, try_r_sel, -np.inf, threshold)
         R_list[fdp_nominals >= try_fdp] = R
