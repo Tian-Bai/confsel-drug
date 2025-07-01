@@ -96,7 +96,7 @@ rf.fit(Xtrain, Ytrain < threshold)
 
 rf_rmse = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
 Ytrain_rmse_pred = rf.predict(Xtrain_rmse)
-rf_rmse.fit(Xtrain_rmse, np.abs(Ytrain_rmse - Ytrain_rmse_pred))
+rf_rmse.fit(Xtrain_rmse, np.abs((Ytrain_rmse < threshold) - Ytrain_rmse_pred))
 
 fdps_clip_s, pcers_clip_s, powers_clip_s = [], [], []
 
@@ -123,7 +123,7 @@ rf.fit(Xtrain, Ytrain)
 
 rf_rmse = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
 Ytrain_rmse_pred = rf.predict(Xtrain_rmse)
-rf_rmse.fit(Xtrain_rmse, np.abs(Ytrain_rmse - Ytrain_rmse_pred))
+rf_rmse.fit(Xtrain_rmse, np.abs((Ytrain_rmse < threshold) - Ytrain_rmse_pred))
 
 fdps_res_s, pcers_res_s, powers_res_s = [], [], []
 

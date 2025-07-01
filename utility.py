@@ -6,6 +6,7 @@ import time
 # A map of constants for the target regions of each dataset
 # for each dataset `d`, the target region is (-infinity, thresholds_map[d]).
 thresholds_map = {'NK1': 6.5, 'PGP': -0.3, 'LOGD': 1.5, '3A4': 4.35, 'CB1': 6.5, 'DPP4': 6, 'HIVINT': 6, 'HIVPROT': 4.5, 'METAB': 40, 'OX1': 5, 'OX2': 6, 'PPB': 1, 'RAT_F': 0.3, 'TDI': 0, 'THROMBIN': 6}
+offsets_map = {'NK1': 0.2, 'PGP': 0.1, 'LOGD': 0.2, '3A4': 0.1, 'CB1': 0.2, 'DPP4': 0.3, 'HIVINT': 0.1, 'HIVPROT': 0.2, 'METAB': 10, 'OX1': 0.5, 'OX2': 0.5, 'PPB': 0.3, 'RAT_F': 0.1, 'TDI': 0.1, 'THROMBIN': 1}
 
 def conf_pval(calib_scores, test_scores):
     r"""
@@ -66,9 +67,13 @@ def eval(Y, rejected, lower, higher):
         pcer = 0
         power = 0
     else:
-        fdp = np.sum((lower >= Y[rejected]) | (Y[rejected] >= higher)) / len(rejected)
-        pcer = np.sum((lower >= Y[rejected]) | (Y[rejected] >= higher)) / len(Y)
-        power = np.sum((lower < Y[rejected]) & (Y[rejected] < higher)) / true_reject if true_reject != 0 else 0
+        if np.isscalar(lower) or np.ndim(lower) == 0:
+            lower = np.full_like(Y, lower)
+        if np.isscalar(higher) or np.ndim(higher) == 0:
+            higher = np.full_like(Y, higher)
+        fdp = np.sum((lower[rejected] >= Y[rejected]) | (Y[rejected] >= higher[rejected])) / len(rejected)
+        pcer = np.sum((lower[rejected] >= Y[rejected]) | (Y[rejected] >= higher[rejected])) / len(Y)
+        power = np.sum((lower[rejected] < Y[rejected]) & (Y[rejected] < higher[rejected])) / true_reject if true_reject != 0 else 0
     return fdp, pcer, power
 
 def dice_sim(f, set_of_f):
