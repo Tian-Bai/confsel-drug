@@ -68,8 +68,8 @@ for calibsize in [0.05, 0.1, 0.2, 0.3, 0.35]:
         })))
 
 # save the results
-out_dir = os.path.join(f'result_calibsize', args.model, f'{dataset_name} {args.sample:.2f}')
+out_dir = os.path.join(f'result_calibsize', f'{dataset_name} {args.sample:.2f}')
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
-all_res.to_csv(os.path.join(f'result_calibsize', args.model, f'{dataset_name} {args.sample:.2f}', f'{dataset_name} {args.sample:.2f} {args.seed}.csv'))
+all_res.to_csv(os.path.join(f'result_calibsize', f'{dataset_name} {args.sample:.2f}', f'{dataset_name} {args.sample:.2f} {args.seed}.csv'))
