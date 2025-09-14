@@ -49,7 +49,8 @@ Xtrain, Xcalib, Ytrain, Ycalib = train_test_split(Xtc, Ytc, train_size=50/85, sh
 mdl.fit(Xtrain, Ytrain < threshold)
 
 for calibsize in [0.05, 0.1, 0.2, 0.3, 0.35]:
-    Xcalib, _, Ycalib, _ = train_test_split(Xcalib, Ycalib, train_size=calibsize/0.35, shuffle=True)
+    if calibsize != 0.35:
+        Xcalib, _, Ycalib, _ = train_test_split(Xcalib, Ycalib, train_size=calibsize/0.35, shuffle=True)
 
     for i, fdp_nominal in enumerate(fdp_nominals):
         calib_scores = 1000 * (Ycalib < threshold) - mdl.predict(Xcalib)
