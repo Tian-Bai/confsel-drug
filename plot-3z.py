@@ -82,10 +82,10 @@ fig.subplots_adjust(wspace=0.2, hspace=0.3, top=0.9, bottom=0.13, left=0.07, rig
 
 # Add global x and y labels, move them slightly outward
 fig.text(0.5, 0.07, 'Nominal FDR', ha='center', fontsize=22)  # Moved down slightly
-fig.text(0.03, 0.5, 'Observed FDP/FOR', va='center', rotation='vertical', fontsize=22)  # Moved left slightly
+fig.text(0.03, 0.5, 'Observed FDR/FOR', va='center', rotation='vertical', fontsize=22)  # Moved left slightly
 
 # Title for the entire plot
-# fig.suptitle("FDP Control for all 15 Datasets", fontsize=16)
+# fig.suptitle("FDR Control for all 15 Datasets", fontsize=16)
 
 # Display the plot
 plt.savefig(os.path.join("pic", "3zfdp.pdf"))
