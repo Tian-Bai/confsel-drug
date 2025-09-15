@@ -45,12 +45,14 @@ all_res = pd.DataFrame() # results
 
 # fit random forest regressor
 mdl = RandomForestRegressor(n_estimators=100, max_depth=20, max_features='sqrt')
-Xtrain, Xcalib, Ytrain, Ycalib = train_test_split(Xtc, Ytc, train_size=50/85, shuffle=True)
+Xtrain, Xcalib_full, Ytrain, Ycalib_full = train_test_split(Xtc, Ytc, train_size=50/85, shuffle=True)
 mdl.fit(Xtrain, Ytrain < threshold)
 
 for calibsize in [0.05, 0.1, 0.2, 0.3, 0.35]:
     if calibsize != 0.35:
-        Xcalib, _, Ycalib, _ = train_test_split(Xcalib, Ycalib, train_size=calibsize/0.35, shuffle=True)
+        Xcalib, _, Ycalib, _ = train_test_split(Xcalib_full, Ycalib_full, train_size=calibsize/0.35, shuffle=True)
+    else:
+        Xcalib, Ycalib = Xcalib_full, Ycalib_full
 
     for i, fdp_nominal in enumerate(fdp_nominals):
         calib_scores = 1000 * (Ycalib < threshold) - mdl.predict(Xcalib)
