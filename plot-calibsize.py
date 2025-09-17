@@ -30,7 +30,7 @@ for name in dataset_list:
     df = pd.concat(df_ones).groupby(["calibsize", "fdp_nominal"], as_index=False).mean()
 
     # if only to q=0.5
-    # df = df[df['fdp_nominal'] <= 0.5]
+    df = df[df['fdp_nominal'] <= 0.5]
     df_list.append(df)
 
 # Create a grid for subplots
@@ -50,7 +50,7 @@ for i, name in enumerate(dataset_list):
             line1, = ax.plot(df_tmp['fdp_nominal'], df_tmp['fdp'], 
                         label=f'{cs:.2f}', marker='o', alpha=0.8)
         
-        ax.legend(loc='best', bbox_to_anchor=(5.85, -2.9), frameon=True, shadow=False, ncol=5, fontsize=21)
+        ax.legend(loc='best', bbox_to_anchor=(4.7, -2.9), frameon=True, shadow=False, ncol=5, fontsize=21)
     else:
         for cs in [0.05, 0.1, 0.2, 0.3, 0.35]:
             df_tmp = df_list[i]
@@ -107,7 +107,7 @@ for i, name in enumerate(dataset_list):
             line1, = ax.plot(df_tmp['fdp_nominal'], df_tmp['power'], 
                         label=f'{cs:.2f}', marker='o', alpha=0.8)
         
-        ax.legend(loc='best', bbox_to_anchor=(5.85, -2.9), frameon=True, shadow=False, ncol=5, fontsize=21)
+        ax.legend(loc='best', bbox_to_anchor=(4.7, -2.9), frameon=True, shadow=False, ncol=5, fontsize=21)
     else:
         for cs in [0.05, 0.1, 0.2, 0.3, 0.35]:
             df_tmp = df_list[i]
