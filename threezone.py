@@ -72,6 +72,7 @@ for fdp_nominal in fdp_nominals:
         red = set(sel_backward) - set(sel_forward)
 
         green_fdp, _, green_power = eval(Ytest, list(green), -np.inf, threshold)
+        gg_fdp, _, gg_power = eval(Ytest, list(green | grey), -np.inf, threshold)
         red_fdp, _, red_power = eval(Ytest, list(red), threshold, np.inf) # red_fdp is exactly FOP, red_power is the deselection power
         # deselection power: fraction of candidates that I didn't select, among those I should not select. The higher the better
 
@@ -80,6 +81,8 @@ for fdp_nominal in fdp_nominals:
             'fop_nominal': [fop_nominal],
             'green_fdp': [green_fdp],
             'green_power': [green_power],
+            'gg_fdp': [gg_fdp],
+            'gg_power': [gg_power],
             'red_fdp': [red_fdp],
             'red_power': [red_power],
         })))
